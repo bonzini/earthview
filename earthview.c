@@ -8,6 +8,8 @@
 #include <stdlib.h>
 
 #include "drawing.h"
+#include "anim.h"
+#include "map.h"
 
 int
 main (int argc, char **argv)
@@ -16,6 +18,9 @@ main (int argc, char **argv)
 
   /* initialize SDL and create as OpenGL-texture source */
   cairo_t *cairo_context = init_sdl ();
+
+  init_anim ();
+  init_map ();
 
   start_ticks = SDL_GetTicks ();
 
@@ -31,6 +36,10 @@ main (int argc, char **argv)
       /* check for user hitting close-window widget */
       if (event.type == SDL_QUIT)
 	break;
+
+      /* Call functions here to parse event and render on cairo_context...  */
+      do_anim (cairo_context, &event);
+      do_map (cairo_context, &event);
     }
 
   printf ("%.2f fps\n", (i * 1000.0) / (SDL_GetTicks () - start_ticks));

@@ -5,9 +5,11 @@ all: earthview sunrise-test
 clean:
 	rm earthview sunrise-test *.o
 
-earthview: drawing.o earthview.o
+earthview: drawing.o earthview.o anim.o map.o
 sunrise-test: sunrise-test.o sunrise.o
 
+anim.o: anim.c drawing.h
+map.o: map.c drawing.h sunrise.h project.h map.h anim.h
 drawing.o: drawing.c drawing.h
 earthview.o: earthview.c drawing.h
 sunrise.o: sunrise.c sunrise.h
