@@ -11,7 +11,7 @@
 #include "SDL.h"
 
 #define WIN_WIDTH	720
-#define WIN_HEIGHT	512
+#define WIN_HEIGHT	360
 #define WIN_TITLE	"EarthView"
 
 /* Functions to create more cairo contexts.  */
