@@ -10,6 +10,13 @@
 #include <cairo.h>
 #include <SDL.h>
 
+struct time
+{
+  int year, month, day, h, m;
+};
+
+extern struct time cur_time;
+
 extern void init_anim ();
 extern void do_anim (cairo_t *cairo_context, SDL_Event *event);
 

@@ -5,7 +5,7 @@ all: earthview sunrise-test
 clean:
 	rm earthview sunrise-test *.o
 
-earthview: drawing.o earthview.o anim.o map.o
+earthview: anim.o map.o drawing.o earthview.o sunrise.o
 sunrise-test: sunrise-test.o sunrise.o
 
 anim.o: anim.c drawing.h
