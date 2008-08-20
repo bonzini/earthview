@@ -159,13 +159,16 @@ static int marching_squares (cairo_t *cairo_context, int x, int y,
 }
 
 
-static cairo_pattern_t *map;
+static cairo_t *map_context;
 
 void
 init_map (void)
 {
   cairo_surface_t *png_map = cairo_image_surface_create_from_png ("map.png");
-  map = cairo_pattern_create_for_surface (png_map);
+  map_context = create_cairo_context ();
+  cairo_set_source_surface (map_context, png_map, 0, 0);
+  cairo_paint (map_context);
+  cairo_surface_destroy (png_map);
 }
 
 void
@@ -224,7 +227,7 @@ do_map (cairo_t *cairo_context, SDL_Event *event)
 {
   cairo_save (cairo_context);
   cairo_set_operator (cairo_context, CAIRO_OPERATOR_SOURCE);
-  cairo_set_source (cairo_context, map);
+  cairo_set_source_surface (cairo_context, cairo_get_target (map_context), 0, 0);
   cairo_paint (cairo_context);
   cairo_restore (cairo_context);
 
