@@ -209,8 +209,13 @@ render_map_marching_squares (cairo_t *cairo_context, sun_rise_set_fn *f,
 		      has_daylight, (void *) f);
 
   cairo_close_path (cairo_context);
-  cairo_clip (cairo_context);
-  cairo_paint_with_alpha (cairo_context, alpha);
+
+  /* We want to draw the dark parts, not the lit parts.  By drawing a
+     rectangle and exploiting the even-odd fill rule, we invert what
+     is in the curve and what is outside.  */
+  cairo_rectangle (cairo_context, 0.0, 0.0, WIN_WIDTH, WIN_HEIGHT);
+  cairo_set_source_rgba (cairo_context, 0.0, 0.0, 0.0, alpha);
+  cairo_fill (cairo_context);
   cairo_restore (cairo_context);
 }
 
@@ -218,14 +223,11 @@ void
 do_map (cairo_t *cairo_context, SDL_Event *event)
 {
   cairo_save (cairo_context);
-  cairo_set_source_rgba (cairo_context, 0.0, 0.0, 0.0, 1.0);
-  cairo_paint (cairo_context);
-
+  cairo_set_operator (cairo_context, CAIRO_OPERATOR_SOURCE);
   cairo_set_source (cairo_context, map);
-  cairo_set_operator (cairo_context, CAIRO_OPERATOR_ADD);
-  cairo_paint_with_alpha (cairo_context, 0.5);
-
-  render_map_marching_squares (cairo_context, sun_rise_set, 0.25);
-  render_map_marching_squares (cairo_context, civil_rise_set, 0.25);
+  cairo_paint (cairo_context);
   cairo_restore (cairo_context);
+
+  render_map_marching_squares (cairo_context, civil_rise_set, 0.25);
+  render_map_marching_squares (cairo_context, sun_rise_set, 0.33);
 }
