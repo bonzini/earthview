@@ -48,10 +48,11 @@ calc_sun_position (double d, double *sin_slon, double *cos_slon, double *r)
     e,				/* Eccentricity of Earth's orbit */
     E,				/* Eccentric anomaly */
     x, y,			/* x, y coordinates in orbit */
-    v;				/* True anomaly */
+    v,				/* True anomaly */
+    rinv;
 
   /* Compute mean elements */
-  M = normalize (356.0470 + 0.9856002585 * d);
+  M = -3.9530 + 0.9856002585 * d;
   w = 282.9404 + 4.70935E-5 * d;
   e = 0.016709 - 1.151E-9 * d;
 
@@ -63,11 +64,12 @@ calc_sun_position (double d, double *sin_slon, double *cos_slon, double *r)
 
   /* compute sin (v + w) and cos (v + w), where sin(v) = y/r and cos(v) = x/r,
      using addition formulas.  */
+  rinv = 1.0 / *r;
   sw = sind (w);
   cw = cosd (w);
-  *sin_slon = (x * sw + y * cw) / *r;
+  *sin_slon = (x * sw + y * cw) * rinv;
   if (cos_slon)
-    *cos_slon = (x * cw - y * sw) / *r;
+    *cos_slon = (x * cw - y * sw) * rinv;
 }
 
 static void
@@ -123,7 +125,6 @@ int calc_sun_rise_set
     sr,				/* Solar distance, astronomical units */
     sRA,			/* Sun's Right Ascension */
     sdec, cdec,			/* Sun's declination sine and cosine */
-    sradius,			/* Sun's apparent radius */
     t,				/* Diurnal arc */
     tsouth,			/* Time when Sun is at south */
     sidtime,			/* Local sidereal time */
@@ -143,12 +144,10 @@ int calc_sun_rise_set
   /* Compute time when Sun is at south - in hours UT */
   tsouth = 12.0 - normalize180 (sidtime - sRA) / 15.0;
 
-  /* Compute the Sun's apparent radius, degrees */
-  sradius = 0.2666 / sr;
-
-  /* Do correction to upper limb, if necessary */
+  /* Compute the Sun's apparent radius to do correction to upper limb,
+     if necessary */
   if (upper_limb)
-    altit -= sradius;
+    altit -= 0.2666 / sr;
 
   /* Compute the diurnal arc that the Sun traverses to reach */
   /* the specified altitide altit: */
@@ -185,7 +184,6 @@ double calc_day_length
     sin_slon,			/* Sine of True solar longitude */
     sin_sdecl,			/* Sine of Sun's declination */
     cos_sdecl,			/* Cosine of Sun's declination */
-    sradius,			/* Sun's apparent radius */
     t,				/* Diurnal arc */
     cost;
 
@@ -201,12 +199,10 @@ double calc_day_length
   sin_sdecl = sind (obl_ecl) * sin_slon;
   cos_sdecl = sqrt (1.0 - sin_sdecl * sin_sdecl);
 
-  /* Compute the Sun's apparent radius, degrees */
-  sradius = 0.2666 / sr;
-
-  /* Do correction to upper limb, if necessary */
+  /* Compute the Sun's apparent radius to do correction to upper limb,
+     if necessary */
   if (upper_limb)
-    altit -= sradius;
+    altit -= 0.2666 / sr;
 
   /* Compute the diurnal arc that the Sun traverses to reach */
   /* the specified altitide altit: */

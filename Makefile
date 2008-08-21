@@ -1,4 +1,4 @@
-CFLAGS = -g `pkg-config cairo --cflags` `pkg-config sdl --cflags`
+CFLAGS = -g `pkg-config cairo --cflags` `pkg-config sdl --cflags` -O2 -ffast-math
 LDFLAGS = -g `pkg-config cairo --libs` `pkg-config sdl --libs`
 
 all: earthview sunrise-test
