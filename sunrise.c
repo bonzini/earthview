@@ -4,6 +4,7 @@
    This source code is released for free distribution under the terms
    of the GNU General Public License.  */
 
+#include <stdio.h>
 #include <math.h>
 
 /* Trigonometric functions in degrees.  */
@@ -39,10 +40,10 @@ normalize180 (double x)
    number of days since 1/1/2000. The Sun's ecliptic latitude is not computed,
    since it's always very near 0.  */
 static void
-calc_sun_position (double d, double *lon, double *r)
+calc_sun_position (double d, double *sin_slon, double *cos_slon, double *r)
 {
   double M,			/* Mean anomaly of the Sun */
-    w,				/* Mean longitude of perihelion */
+    w, sw, cw,			/* Mean longitude of perihelion + sin/cos */
     /* Note: Sun's mean longitude = M + w */
     e,				/* Eccentricity of Earth's orbit */
     E,				/* Eccentric anomaly */
@@ -59,10 +60,14 @@ calc_sun_position (double d, double *lon, double *r)
   x = cosd (E) - e;
   y = sqrt (1.0 - e * e) * sind (E);
   *r = sqrt (x * x + y * y);	/* Solar distance */
-  v = atan2d (y, x);		/* True anomaly */
-  *lon = v + w;			/* True solar longitude */
-  if (*lon >= 360.0)
-    *lon -= 360.0;		/* Make it 0..360 degrees */
+
+  /* compute sin (v + w) and cos (v + w), where sin(v) = y/r and cos(v) = x/r,
+     using addition formulas.  */
+  sw = sind (w);
+  cw = cosd (w);
+  *sin_slon = (x * sw + y * cw) / *r;
+  if (cos_slon)
+    *cos_slon = (x * cw - y * sw) / *r;
 }
 
 static void
@@ -71,11 +76,7 @@ calc_sun_ra_and_decl (double d, double *RA, double *sdec, double *cdec, double *
   double lon, obl_ecl, x, y, z;
 
   /* Compute Sun's ecliptical coordinates */
-  calc_sun_position (d, &lon, r);
-
-  /* Compute ecliptic rectangular coordinates (z=0) */
-  x = cosd (lon);
-  y = sind (lon);
+  calc_sun_position (d, &y, &x, r);
 
   /* Compute obliquity of ecliptic (inclination of Earth's axis) */
   obl_ecl = 23.4393 - 3.563E-7 * d;
@@ -181,7 +182,7 @@ double calc_day_length
   double d,			/* Days since 2000 Jan 0.0 (negative before) */
     obl_ecl,			/* Obliquity (inclination) of Earth's axis */
     sr,				/* Solar distance, astronomical units */
-    slon,			/* True solar longitude */
+    sin_slon,			/* Sine of True solar longitude */
     sin_sdecl,			/* Sine of Sun's declination */
     cos_sdecl,			/* Cosine of Sun's declination */
     sradius,			/* Sun's apparent radius */
@@ -194,10 +195,10 @@ double calc_day_length
   obl_ecl = 23.4393 - 3.563E-7 * d;
 
   /* Compute Sun's position */
-  calc_sun_position (d, &slon, &sr);
+  calc_sun_position (d, &sin_slon, NULL, &sr);
 
   /* Compute sine and cosine of Sun's declination */
-  sin_sdecl = sind (obl_ecl) * sind (slon);
+  sin_sdecl = sind (obl_ecl) * sin_slon;
   cos_sdecl = sqrt (1.0 - sin_sdecl * sin_sdecl);
 
   /* Compute the Sun's apparent radius, degrees */
