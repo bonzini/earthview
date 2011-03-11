@@ -1,11 +1,14 @@
 CFLAGS = -g `pkg-config cairo --cflags` `pkg-config sdl --cflags` -O2 -ffast-math
-LDFLAGS = -g `pkg-config cairo --libs` `pkg-config sdl --libs`
+LDFLAGS = -g `pkg-config cairo --libs` `pkg-config sdl --libs` -lm
 
 all: earthview sunrise-test
 clean:
-	rm earthview sunrise-test *.o
+	rm -f earthview sunrise-test *.o
 
-earthview: anim.o map.o drawing.o earthview.o sunrise.o
+.o:
+	$(CC) -o $@ $^ $(LDFLAGS)
+
+earthview: earthview.o anim.o map.o drawing.o sunrise.o
 sunrise-test: sunrise-test.o sunrise.o
 
 anim.o: anim.c drawing.h
